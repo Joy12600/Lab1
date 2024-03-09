@@ -182,6 +182,26 @@ class ArbolAVL:
             return nivel
         else:
             return nivel(raiz, raiz, nivel + 1)
+        
+    def find_parent(nodo, current_node, parent_dict):
+        """
+        Recursive function to find the parent node of a given node in a tree.
+
+        :param node: The current node.
+        :param current_node: The node for which we want to find the parent.
+        :param parent_dict: A dictionary that maps each node to its parent.
+        :return: The parent node of the given node.
+        """
+        if nodo is None or nodo == current_node:
+            return None
+        else:
+            for child in nodo:
+                if child in parent_dict:
+                    parent = parent_dict[child]
+                    if parent is not None:
+                        return parent(parent, current_node, parent_dict)
+                else:
+                    return parent(nodo[child], current_node, parent_dict)
 
     def buscar_por_categoria_y_tamano(self, categoria, tamano_min, tamano_max):
         """
