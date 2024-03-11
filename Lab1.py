@@ -340,3 +340,14 @@ class ArbolAVL:
             self.imprimir_arbol(nodo.izquierda, nivel + 1)
         if nodo.derecha:
             self.imprimir_arbol(nodo.derecha, nivel + 1)
+
+carpeta_datos = 'data'
+arbol = ArbolAVL()
+for nombre_archivo in os.listdir(carpeta_datos):
+    ruta_archivo = os.path.join(carpeta_datos, nombre_archivo)
+    if os.path.isfile(ruta_archivo):
+        with open(ruta_archivo, 'r') as archivo:
+            # Leer el contenido del archivo e insertar el valor en el árbol AVL
+            valor = archivo.read()
+            arbol.insertar(valor)
+arbol.imprimir_arbol()
