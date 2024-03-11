@@ -183,25 +183,25 @@ class ArbolAVL:
         else:
             return nivel(raiz, raiz, nivel + 1)
         
-    def find_parent(nodo, current_node, parent_dict):
+    def encontrar_padre(node, current_node, parent_dict):
         """
-        Recursive function to find the parent node of a given node in a tree.
-
-        :param node: The current node.
-        :param current_node: The node for which we want to find the parent.
-        :param parent_dict: A dictionary that maps each node to its parent.
-        :return: The parent node of the given node.
+        Esta funcion tiene como parametros el nodo, el nodo actual y padres
+        que sirve como una lista que mapea cada nodo.
+        Entrando a una condicion que verifica si el nodo esta vacio o si el mismo es igual al nodo actual,
+        sino este entrara a un ciclo para en el que verificara si el hijo esta en el nodo, luego si el hijo
+        es parte de la lista padres.
+        Verificara que la variable padre no este vacia y retornara 
         """
-        if nodo is None or nodo == current_node:
+        if node is None or node == current_node:
             return None
         else:
-            for child in nodo:
+            for child in node:
                 if child in parent_dict:
                     parent = parent_dict[child]
                     if parent is not None:
                         return parent(parent, current_node, parent_dict)
                 else:
-                    return parent(nodo[child], current_node, parent_dict)
+                    return parent(node[child], current_node, parent_dict)
 
     def buscar_por_categoria_y_tamano(self, categoria, tamano_min, tamano_max):
         """
@@ -340,14 +340,3 @@ class ArbolAVL:
             self.imprimir_arbol(nodo.izquierda, nivel + 1)
         if nodo.derecha:
             self.imprimir_arbol(nodo.derecha, nivel + 1)
-
-carpeta_datos = 'data'
-arbol = ArbolAVL()
-for nombre_archivo in os.listdir(carpeta_datos):
-    ruta_archivo = os.path.join(carpeta_datos, nombre_archivo)
-    if os.path.isfile(ruta_archivo):
-        with open(ruta_archivo, 'r') as archivo:
-            # Leer el contenido del archivo e insertar el valor en el árbol AVL
-            valor = archivo.read()
-            arbol.insertar(valor)
-arbol.imprimir_arbol()
