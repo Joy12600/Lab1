@@ -121,13 +121,6 @@ class ArbolAVL:
             return 0
         return 1 + max(self.altura(nodo.izquierda), self.altura(nodo.derecha))
 
-    def balanceado(self, nodo):
-        if not nodo:
-            return True
-        altura_izq = self.altura(nodo.izquierda)
-        altura_der = self.altura(nodo.derecha)
-        return abs(altura_izq - altura_der) <= 1 and self.balanceado(nodo.izquierda) and self.balanceado(nodo.derecha)
-
     def imprimir_nivel(self, raiz):
         h = self.altura(raiz)
         for i in range(1, h + 1):
