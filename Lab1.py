@@ -187,11 +187,6 @@ class ArbolAVL:
             return 0
         return nodo.altura
 
-    def _obtener_balance(self, nodo):
-        if not nodo:
-            return 0
-        return self._obtener_altura(nodo.izquierda) - self._obtener_altura(nodo.derecha)
-
     def _rotar_izquierda(self, z):
         y = z.derecha
         T2 = y.izquierda
