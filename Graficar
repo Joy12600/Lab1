@@ -1,0 +1,23 @@
+
+import os
+import numpy as np
+import matplotlib.pyplot as plt
+
+
+# Directory path containing the tree data files
+folder_path = 'Lab1-main/data'
+
+# Collecting the data files
+data_files = []
+for root, dirs, files in os.walk(folder_path):
+    for file in files:
+        if file.endswith('.bmp'):  # Adjust the file extension as per your data format
+            data_files.append(os.path.join(root, file))
+
+    # Plotting the tree
+    for file in data_files:
+        # Load and process the data from each file
+        # Plot the data using matplotlib or any other library
+
+    # Show the plot
+        plt.show()
