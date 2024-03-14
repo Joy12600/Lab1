@@ -11,14 +11,49 @@ class ArbolAVL:
     def __init__(self):
         self.raiz = None
 
-    def imprimir_arbol(self, nodo=None, nivel=0):
+    def altura(self, nodo):
         if not nodo:
-            nodo = self.raiz
-        print(' ' * nivel + str(nodo.valor))
-        if nodo.izquierda:
-            self.imprimir_arbol(nodo.izquierda, nivel + 1)
-        if nodo.derecha:
-            self.imprimir_arbol(nodo.derecha, nivel + 1)
+            return 0
+        return 1 + max(self.altura(nodo.izquierda), self.altura(nodo.derecha))
+
+    def factor_balanceo(self, nodo):
+        if not nodo:
+            return 0
+        return self.altura(nodo.izquierda) - self.altura(nodo.derecha)
+
+    def _obtener_altura(self, nodo):
+        if not nodo:
+            return 0
+        return nodo.altura
+
+    def _obtener_balance(self, nodo):
+        if not nodo:
+            return 0
+        return self._obtener_altura(nodo.izquierda) - self._obtener_altura(nodo.derecha)
+
+    def _rotar_izquierda(self, z):
+        y = z.derecha
+        T2 = y.izquierda
+
+        y.izquierda = z
+        z.derecha = T2
+
+        z.altura = 1 + max(self._obtener_altura(z.izquierda), self._obtener_altura(z.derecha))
+        y.altura = 1 + max(self._obtener_altura(y.izquierda), self._obtener_altura(y.derecha))
+
+        return y
+
+    def _rotar_derecha(self, z):
+        y = z.izquierda
+        T3 = y.derecha
+
+        y.derecha = z
+        z.izquierda = T3
+
+        z.altura = 1 + max(self._obtener_altura(z.izquierda), self._obtener_altura(z.derecha))
+        y.altura = 1 + max(self._obtener_altura(y.izquierda), self._obtener_altura(y.derecha))
+
+        return y
 
     def insertar(self, valor):
         if not self.raiz:
@@ -35,20 +70,7 @@ class ArbolAVL:
             nodo.derecha = self._insertar(nodo.derecha, valor)
 
         nodo.altura = 1 + max(self._obtener_altura(nodo.izquierda), self._obtener_altura(nodo.derecha))
-        balance = self._obtener_balance(nodo)
-
-        if balance > 1:
-            if valor < nodo.izquierda.valor:
-                return self._rotar_derecha(nodo)
-            else:
-                nodo.izquierda = self._rotar_izquierda(nodo.izquierda)
-                return self._rotar_derecha(nodo)
-        elif balance < -1:
-            if valor > nodo.derecha.valor:
-                return self._rotar_izquierda(nodo)
-            else:
-                nodo.derecha = self._rotar_derecha(nodo.derecha)
-                return self._rotar_izquierda(nodo)
+        self._balancear(nodo)
 
         return nodo
 
@@ -76,6 +98,11 @@ class ArbolAVL:
                 nodo.derecha = self._eliminar(nodo.derecha, nodo_min.valor)
 
         nodo.altura = 1 + max(self._obtener_altura(nodo.izquierda), self._obtener_altura(nodo.derecha))
+        self._balancear(nodo)
+
+        return nodo
+
+    def _balancear(self, nodo):
         balance = self._obtener_balance(nodo)
 
         if balance > 1:
@@ -89,127 +116,19 @@ class ArbolAVL:
                 return self._rotar_izquierda(nodo)
             else:
                 nodo.derecha = self._rotar_derecha(nodo.derecha)
+                return self._rotar_izquierda(nodo)
 
         return nodo
 
-    def buscar(self, valor):
-        return self._buscar(self.raiz, valor)
-
-    def _buscar(self, nodo, valor):
-        if not nodo or nodo.valor == valor:
-            return nodo
-        elif valor < nodo.valor:
-            return self._buscar(nodo.izquierda, valor)
-        else:
-            return self._buscar(nodo.derecha, valor)
-
-    def mostrar_nivel_nodo(self, nodo):
-        return self._mostrar_nivel_nodo(self.raiz, nodo, 1)
-
-    def _mostrar_nivel_nodo(self, nodo_actual, nodo_buscado, nivel):
-        if nodo_actual is None:
-            return None
-        if nodo_actual == nodo_buscado:
-            return nivel
-        if nodo_buscado.valor < nodo_actual.valor:
-            return self._mostrar_nivel_nodo(nodo_actual.izquierda, nodo_buscado, nivel + 1)
-        else:
-            return self._mostrar_nivel_nodo(nodo_actual.derecha, nodo_buscado, nivel + 1)
-
-    def altura(self, nodo):
+    def imprimir_arbol(self, nodo=None, nivel=0):
         if not nodo:
-            return 0
-        return 1 + max(self.altura(nodo.izquierda), self.altura(nodo.derecha))
-
-    def imprimir_nivel(self, raiz):
-        h = self.altura(raiz)
-        for i in range(1, h + 1):
-            self.imprimir_nivel_dado(raiz, i)
-
-    def imprimir_nivel_dado(self, raiz, nivel):
-        if not raiz:
-            return
-        if nivel == 1:
-            print(raiz.valor, end=" ")
-        elif nivel > 1:
-            self.imprimir_nivel_dado(raiz.izquierda, nivel - 1)
-            self.imprimir_nivel_dado(raiz.derecha, nivel - 1)
-
-    def encontrar_nodo(self, raiz, metrica):
-        if not raiz:
-            return []
-
-        nodos = []
-        if metrica(raiz):
-            nodos.append(raiz.valor)
-
-        nodos += self.encontrar_nodo(raiz.izquierda, metrica)
-        nodos += self.encontrar_nodo(raiz.derecha, metrica)
-
-        return nodos
-
-    def encontrar_padre(self, nodo_buscado):
-        parent_dict = {}
-        return self._encontrar_padre(self.raiz, None, nodo_buscado, parent_dict)
-
-    def _encontrar_padre(self, nodo_actual, padre_actual, nodo_buscado, parent_dict):
-        if nodo_actual is None:
-            return None
-
-        parent_dict[nodo_actual] = padre_actual
-
-        if nodo_actual == nodo_buscado:
-            return padre_actual
-
-        izquierda = self._encontrar_padre(nodo_actual.izquierda, nodo_actual, nodo_buscado, parent_dict)
-        derecha = self._encontrar_padre(nodo_actual.derecha, nodo_actual, nodo_buscado, parent_dict)
-
-        return izquierda if izquierda is not None else derecha
-
-    def buscar_por_categoria_y_tamano(self, categoria, tamano_min, tamano_max):
-        resultado = []
-        self._buscar_por_categoria_y_tamano(self.raiz, categoria, tamano_min, tamano_max, resultado)
-        return resultado
-
-    def _buscar_por_categoria_y_tamano(self, nodo, categoria, tamano_min, tamano_max, resultado):
+            nodo = self.raiz
         if nodo:
-            if categoria <= nodo.valor.categoria <= categoria and tamano_min <= nodo.valor.tamano <= tamano_max:
-                resultado.append(nodo)
-
-            if nodo.valor.categoria >= categoria:
-                self._buscar_por_categoria_y_tamano(nodo.izquierda, categoria, tamano_min, tamano_max, resultado)
-
-            if nodo.valor.categoria <= categoria:
-                self._buscar_por_categoria_y_tamano(nodo.derecha, categoria, tamano_min, tamano_max, resultado)
-
-    def _obtener_altura(self, nodo):
-        if not nodo:
-            return 0
-        return nodo.altura
-
-    def _rotar_izquierda(self, z):
-        y = z.derecha
-        T2 = y.izquierda
-
-        y.izquierda = z
-        z.derecha = T2
-
-        z.altura = 1 + max(self._obtener_altura(z.izquierda), self._obtener_altura(z.derecha))
-        y.altura = 1 + max(self._obtener_altura(y.izquierda), self._obtener_altura(y.derecha))
-
-        return y
-
-    def _rotar_derecha(self, z):
-        y = z.izquierda
-        T3 = y.derecha
-
-        y.derecha = z
-        z.izquierda = T3
-
-        z.altura = 1 + max(self._obtener_altura(z.izquierda), self._obtener_altura(z.derecha))
-        y.altura = 1 + max(self._obtener_altura(y.izquierda), self._obtener_altura(y.derecha))
-
-        return y
+            print(' ' * nivel + str(nodo.valor))
+            if nodo.izquierda:
+                self.imprimir_arbol(nodo.izquierda, nivel + 1)
+            if nodo.derecha:
+                self.imprimir_arbol(nodo.derecha, nivel + 1)
 
     def _obtener_nodo_minimo(self, nodo):
         actual = nodo
