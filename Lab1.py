@@ -16,6 +16,34 @@ class ArbolAVL:
             return 0
         return 1 + max(self.altura(nodo.izquierda), self.altura(nodo.derecha))
 
+    def encontrar_abuelo(self, raiz, valor_nodo):
+        if raiz is None:
+            return None
+        nodo = self.buscar_nodo(raiz, valor_nodo)
+        if nodo is None or nodo == raiz:
+            return None
+        padre = self.encontrar_padre(raiz, nodo)
+        if padre is None or padre == raiz:
+            return None
+        abuelo = self.encontrar_padre(raiz, padre)
+        return abuelo
+
+    def buscar_nodo(self, raiz, valor):
+        if raiz is None or raiz.valor == valor:
+            return raiz
+        izquierda = self.buscar_nodo(raiz.izquierda, valor)
+        derecha = self.buscar_nodo(raiz.derecha, valor)
+        return izquierda if izquierda else derecha
+
+    def encontrar_padre(self, raiz, nodo):
+        if raiz is None or raiz == nodo:
+            return None
+        if raiz.izquierda == nodo or raiz.derecha == nodo:
+            return raiz
+        izquierda = self.encontrar_padre(raiz.izquierda, nodo)
+        derecha = self.encontrar_padre(raiz.derecha, nodo)
+        return izquierda if izquierda else derecha
+
     def factor_balanceo(self, nodo):
         if not nodo:
             return 0
@@ -147,9 +175,9 @@ for nombre_archivo in os.listdir(carpeta_datos):
     ruta_archivo = os.path.join(carpeta_datos, nombre_archivo)
     if os.path.isfile(ruta_archivo):
         with open(ruta_archivo, 'r') as archivo:
-            # Leer el contenido del archivo e insertar el valor en el árbol AVL
             valor = archivo.read()
             arbol.insertar(valor)
 
 # Imprimir el árbol AVL
 arbol.imprimir_arbol()
+
