@@ -29,7 +29,7 @@ class AVLTree:
         root.height = 1 + max(self.get_height(root.left), self.get_height(root.right))
         left_height = self.get_height(root.left)
         right_height = self.get_height(root.right)
-        root.factor_balanceo = left_height - right_height
+        root.factor_balanceo = right_height - left_height
         balance = root.factor_balanceo
         if balance > 1 and key < root.left.key:
             return self.right_rotate(root)
