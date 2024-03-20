@@ -270,7 +270,11 @@ class ventana_eliminar(QMainWindow):
         self.close()  # Cerrar la ventana de agregar
         self.ventana_principal.show()  # Mostrar la ventana principal
 class ventana_buscar():
-    pass
+    def __init__(self, avl_tree, Principal):
+        super().__init__()
+        loadUi("BuscarNodo.ui", self)
+        self.avl_tree = avl_tree
+        self.ventana_principal=Principal
 class tam_peso():
     pass
 class Principal(QMainWindow):
