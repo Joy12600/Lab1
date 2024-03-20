@@ -93,33 +93,63 @@ class AVLTree:
         root.balanceo = self.get_height(root.right) - self.get_height(root.left)
         root.factor_balanceo = root.balanceo
         return root
-
+    
     def get_min_value_node(self, root):
         current = root
         while current.left is not None:
             current = current.left
         return current
+    def buscar_nodo(self, root, key):
+        if root is None or root.key == key:
+            return root
+        if root.key < key:
+            return self.buscar_nodo(root.right, key)
+        return self.buscar_nodo(root.left, key)
+
+    def buscar_nodo_padre(self, root, key):
+        if root is None or root.key == key:
+            return None
+        if (root.left and root.left.key == key) or (root.right and root.right.key == key):
+            return root
+        if root.key < key:
+            return self.buscar_nodo_padre(root.right, key)
+        return self.buscar_nodo_padre(root.left, key)
+
+    def buscar_abuelo(self, root, key):
+        padre = self.buscar_nodo_padre(root, key)
+        if padre:
+            abuelo = self.buscar_nodo_padre(root, padre.key)
+            return abuelo
+        return None
+
+    def buscar_tio(self, root, key):
+        padre = self.buscar_nodo_padre(root, key)
+        if padre:
+            if padre.left and padre.left.key == key:
+                return self.buscar_nodo_padre(root, padre.right.key)
+            elif padre.right and padre.right.key == key:
+                return self.buscar_nodo_padre(root, padre.left.key)
+        return None
     def recorrido_nivel(self):
         resultado = []
         if self.root is None:
             return resultado
-
-        queue = [self.root]
-
-        while queue:
-            level_size = len(queue)
-            nivel_actual = []
-
-            for _ in range(level_size):
-                node = queue.pop(0)
-                nivel_actual.append(node.key)
-                if node.left:
-                    queue.append(node.left)
-                if node.right:
-                    queue.append(node.right)
-
-            resultado.append(nivel_actual)
+        self._recorrido_nivel_recursive([self.root], resultado)
         return resultado
+    def _recorrido_nivel_recursive(self, nodes, resultado):
+        if not nodes:
+            return
+        nivel_actual = []
+        siguiente_nivel = []
+        for node in nodes:
+            nivel_actual.append((node.key, node.full_name))
+            if node.left:
+                siguiente_nivel.append(node.left)
+            if node.right:
+                siguiente_nivel.append(node.right)
+
+        resultado.append(nivel_actual)
+        self._recorrido_nivel_recursive(siguiente_nivel, resultado)
     def get_height(self, root):
         if not root:
             return 0
@@ -269,11 +299,23 @@ class ventana_eliminar(QMainWindow):
      def regresar_principal(self):  # Función para regresar a la ventana principal
         self.close()  # Cerrar la ventana de agregar
         self.ventana_principal.show()  # Mostrar la ventana principal
-class ventana_buscar():
-    pass
+class ventana_buscar(QMainWindow):
+    def __init__(self, avl_tree, Principal):
+        super().__init__()
+        loadUi("BuscarNodo.ui", self)
+        self.avl_tree = avl_tree
+        self.ventana_principal=Principal
+        self.pushButton_3.clicked.connect(self.regresar_principal)
+        self.llenar_combobox()
+    def llenar_combobox(self):
+        nodos = self.avl_tree.recorrido_nivel()
+        for nivel in nodos:
+            for nodo in nivel:
+                self.comboBox.addItem(nodo[1], nodo[0])
+    def regresar_principal(self):  # Función para regresar a la ventana principal
+        self.close()  # Cerrar la ventana de agregar
+        self.ventana_principal.show()  # Mostrar la ventana principal
 class tam_peso():
-    pass
-class recorrido_niveles():
     pass
 class Principal(QMainWindow):
     def __init__(self):
@@ -283,6 +325,7 @@ class Principal(QMainWindow):
         self.pushButton.clicked.connect(self.abrir_agregar)
         self.pushButton_2.clicked.connect(self.abrir_eliminar)
         self.pushButton_3.clicked.connect(self.mostrar_recorrido_niveles)
+        self.pushButton_4.clicked.connect(self.abrir_buscar)
     def abrir_agregar(self):
         self.ventana_agregar = ventana_agregar(self.avl_tree, self)  # Crear una instancia de ventana_agregar
         self.hide()
@@ -291,12 +334,19 @@ class Principal(QMainWindow):
         self.ventana_eliminar=ventana_eliminar(self.avl_tree,self)
         self.hide()
         self.ventana_eliminar.show()
+    def abrir_buscar(self):
+        self.ventana_buscar=ventana_buscar(self.avl_tree,self)
+        self.hide()
+        self.ventana_buscar.show()
     def mostrar_recorrido_niveles(self):
         nivel_recorrido = self.avl_tree.recorrido_nivel()
-        message = "Recorrido por Niveles:\n\n"
+        mensaje = "Recorrido por Niveles:\n\n"
         for i, nivel in enumerate(nivel_recorrido):
-            message += f"Nivel {i}: {' '.join(map(str, nivel))}\n"  # Ajuste del índice del nivel
-        QMessageBox.information(self, "Recorrido por Niveles", message)
+            mensaje += f"Nivel {i}: "  # Cambio aquí: comenzar desde 0
+            for nodo in nivel:
+                mensaje += f"{nodo[1]} - "  # Agregar el nombre del nodo al mensaje
+            mensaje += "\n"
+        QMessageBox.information(self, "Recorrido por Niveles", mensaje)
 if __name__ == "__main__": 
     app = QApplication(sys.argv)
     my_app = Principal()
