@@ -7,8 +7,9 @@ import os
 import matplotlib.pyplot as plt
 
 class TreeNode:
-    def __init__(self, key):
+    def __init__(self, key, full_name):
         self.key = key
+        self.full_name = full_name
         self.left = None
         self.right = None
         self.height = 1
@@ -17,14 +18,14 @@ class TreeNode:
 class AVLTree:
     def __init__(self):
         self.root = None
-    def insert(self, root, key):
+    def insert(self, root, key, full_name):
         if not root:
-            return TreeNode(key)
+            return TreeNode(key, full_name)
         
         if key < root.key:
-            root.left = self.insert(root.left, key)
+            root.left = self.insert(root.left, key, full_name)
         else:
-            root.right = self.insert(root.right, key)
+            root.right = self.insert(root.right, key, full_name)
 
         root.height = 1 + max(self.get_height(root.left), self.get_height(root.right))
         left_height = self.get_height(root.left)
@@ -165,7 +166,7 @@ class AVLTree:
             return
 
         ax.plot(x, y, 'ko', markersize=10, alpha=0.3)  # Ajuste de la transparencia
-        ax.text(x, y, f'{node.key}\n{node.factor_balanceo}', fontsize=12, ha='center', va='center')
+        ax.text(x, y, f'{node.key}\n{node.full_name}\n{node.factor_balanceo}', fontsize=12, ha='center', va='center')
 
         if node.left:
             ax.plot([x, x - dx], [y, y - 50], 'k-', alpha=0.3)  # Ajuste de la transparencia
@@ -226,12 +227,13 @@ class ventana_agregar(QMainWindow):
         return int(digits)
     def agregar_nodo(self):
         valor_seleccionado = str(self.comboBox_2.currentText())
+        nombre_completo = valor_seleccionado
         if valor_seleccionado in self.valores_agregados:
             QMessageBox.warning(self, "Error", f"El valor '{valor_seleccionado}' ya ha sido agregado al árbol.")
             return
         try:
             numero = self.extraer_numero(valor_seleccionado)
-            self.avl_tree.root = self.avl_tree.insert(self.avl_tree.root, numero)
+            self.avl_tree.root = self.avl_tree.insert(self.avl_tree.root, numero,  nombre_completo)
             self.valores_agregados.add(valor_seleccionado) 
             self.avl_tree.plot_tree()
         except Exception as e:
@@ -256,12 +258,14 @@ class ventana_eliminar(QMainWindow):
         if node is None:
             return
         self.actualizar_combobox_recursivo(node.left)
-        self.comboBox.addItem(str(node.key))
+        self.comboBox.addItem(node.full_name, node.key)
         self.actualizar_combobox_recursivo(node.right)
      def eliminar_nodo(self):
-        nodo_a_eliminar = int(self.comboBox.currentText())
-        self.avl_tree.root = self.avl_tree.delete(self.avl_tree.root, nodo_a_eliminar)
-        self.avl_tree.plot_tree()
+        valor_seleccionado = self.comboBox.currentData()  # Obtener el valor (número) del nodo seleccionado
+        if valor_seleccionado:
+            nodo_a_eliminar = int(valor_seleccionado)
+            self.avl_tree.root = self.avl_tree.delete(self.avl_tree.root, nodo_a_eliminar)
+            self.avl_tree.plot_tree()
      def regresar_principal(self):  # Función para regresar a la ventana principal
         self.close()  # Cerrar la ventana de agregar
         self.ventana_principal.show()  # Mostrar la ventana principal
@@ -278,6 +282,7 @@ class Principal(QMainWindow):
         self.avl_tree = AVLTree()
         self.pushButton.clicked.connect(self.abrir_agregar)
         self.pushButton_2.clicked.connect(self.abrir_eliminar)
+        self.pushButton_3.clicked.connect(self.mostrar_recorrido_niveles)
     def abrir_agregar(self):
         self.ventana_agregar = ventana_agregar(self.avl_tree, self)  # Crear una instancia de ventana_agregar
         self.hide()
@@ -287,11 +292,10 @@ class Principal(QMainWindow):
         self.hide()
         self.ventana_eliminar.show()
     def mostrar_recorrido_niveles(self):
-        nivel_recorrido = self.avl_tree.level_order_traversal()
+        nivel_recorrido = self.avl_tree.recorrido_nivel()
         message = "Recorrido por Niveles:\n\n"
         for i, nivel in enumerate(nivel_recorrido):
-            message += f"Nivel {i + 1}: {' '.join(map(str, nivel))}\n"
-
+            message += f"Nivel {i}: {' '.join(map(str, nivel))}\n"  # Ajuste del índice del nivel
         QMessageBox.information(self, "Recorrido por Niveles", message)
 if __name__ == "__main__": 
     app = QApplication(sys.argv)

@@ -7,8 +7,9 @@ import os
 import matplotlib.pyplot as plt
 
 class TreeNode:
-    def __init__(self, key):
+    def __init__(self, key, full_name):
         self.key = key
+        self.full_name = full_name
         self.left = None
         self.right = None
         self.height = 1
@@ -17,14 +18,14 @@ class TreeNode:
 class AVLTree:
     def __init__(self):
         self.root = None
-    def insert(self, root, key):
+    def insert(self, root, key, full_name):
         if not root:
-            return TreeNode(key)
+            return TreeNode(key, full_name)
         
         if key < root.key:
-            root.left = self.insert(root.left, key)
+            root.left = self.insert(root.left, key, full_name)
         else:
-            root.right = self.insert(root.right, key)
+            root.right = self.insert(root.right, key, full_name)
 
         root.height = 1 + max(self.get_height(root.left), self.get_height(root.right))
         left_height = self.get_height(root.left)
@@ -165,7 +166,7 @@ class AVLTree:
             return
 
         ax.plot(x, y, 'ko', markersize=10, alpha=0.3)  # Ajuste de la transparencia
-        ax.text(x, y, f'{node.key}\n{node.factor_balanceo}', fontsize=12, ha='center', va='center')
+        ax.text(x, y, f'{node.key}\n{node.full_name}\n{node.factor_balanceo}', fontsize=12, ha='center', va='center')
 
         if node.left:
             ax.plot([x, x - dx], [y, y - 50], 'k-', alpha=0.3)  # Ajuste de la transparencia
@@ -226,12 +227,13 @@ class ventana_agregar(QMainWindow):
         return int(digits)
     def agregar_nodo(self):
         valor_seleccionado = str(self.comboBox_2.currentText())
+        nombre_completo = valor_seleccionado
         if valor_seleccionado in self.valores_agregados:
             QMessageBox.warning(self, "Error", f"El valor '{valor_seleccionado}' ya ha sido agregado al árbol.")
             return
         try:
             numero = self.extraer_numero(valor_seleccionado)
-            self.avl_tree.root = self.avl_tree.insert(self.avl_tree.root, numero)
+            self.avl_tree.root = self.avl_tree.insert(self.avl_tree.root, numero,  nombre_completo)
             self.valores_agregados.add(valor_seleccionado) 
             self.avl_tree.plot_tree()
         except Exception as e:
