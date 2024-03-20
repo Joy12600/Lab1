@@ -93,13 +93,43 @@ class AVLTree:
         root.balanceo = self.get_height(root.right) - self.get_height(root.left)
         root.factor_balanceo = root.balanceo
         return root
-
+    
     def get_min_value_node(self, root):
         current = root
         while current.left is not None:
             current = current.left
         return current
-   
+    def buscar_nodo(self, root, key):
+        if root is None or root.key == key:
+            return root
+        if root.key < key:
+            return self.buscar_nodo(root.right, key)
+        return self.buscar_nodo(root.left, key)
+
+    def buscar_nodo_padre(self, root, key):
+        if root is None or root.key == key:
+            return None
+        if (root.left and root.left.key == key) or (root.right and root.right.key == key):
+            return root
+        if root.key < key:
+            return self.buscar_nodo_padre(root.right, key)
+        return self.buscar_nodo_padre(root.left, key)
+    def buscar_abuelo(self, root, key):
+        padre = self.buscar_nodo_padre(root, key)
+        if padre:
+            abuelo = self.buscar_nodo_padre(root, padre.key)
+            return abuelo
+        return None
+
+    def buscar_tio(self, root, key):
+        padre = self.buscar_nodo_padre(root, key)
+        if padre:
+            if padre.left and padre.left.key == key:
+                return self.buscar_nodo_padre(root, padre.right.key)
+            elif padre.right and padre.right.key == key:
+                return self.buscar_nodo_padre(root, padre.left.key)
+                
+        return None
     def recorrido_nivel(self):
         resultado = []
         if self.root is None:
@@ -269,12 +299,49 @@ class ventana_eliminar(QMainWindow):
      def regresar_principal(self):  # Función para regresar a la ventana principal
         self.close()  # Cerrar la ventana de agregar
         self.ventana_principal.show()  # Mostrar la ventana principal
-class ventana_buscar():
+class ventana_buscar(QMainWindow):
     def __init__(self, avl_tree, Principal):
         super().__init__()
         loadUi("BuscarNodo.ui", self)
         self.avl_tree = avl_tree
         self.ventana_principal=Principal
+        self.llenar_combobox()
+        self.pushButton_2.clicked.connect(self.buscar_nodo_mostrar_info)
+        self.pushButton_3.clicked.connect(self.regresar_principal)
+    def llenar_combobox(self):
+        nodos = self.avl_tree.recorrido_nivel()
+        for nivel in nodos:
+            for nodo in nivel:
+                self.comboBox.addItem(nodo[1], nodo[0])
+    def buscar_nodo_mostrar_info(self):
+        nodo_seleccionado = self.comboBox.currentData()
+        if nodo_seleccionado:
+            nodo = self.avl_tree.buscar_nodo(self.avl_tree.root, nodo_seleccionado)
+            if nodo:
+                mensaje = f"Nombre del Nodo: {nodo.full_name}\n"
+                padre = self.avl_tree.buscar_nodo_padre(self.avl_tree.root, nodo.key)
+                if padre:
+                    mensaje += f"Nombre del Padre: {padre.full_name}\n"
+                else:
+                    mensaje += "No tiene padre.\n"
+                abuelo = self.avl_tree.buscar_abuelo(self.avl_tree.root, nodo.key)
+                if abuelo:
+                    mensaje += f"Nombre del Abuelo: {abuelo.full_name}\n"
+                else:
+                    mensaje += "No tiene abuelo.\n" 
+                tio = self.avl_tree.buscar_tio(self.avl_tree.root, nodo.key)
+                if tio:
+                    mensaje += f"Nombre del Tío: {tio.full_name}\n"
+                else:
+                    mensaje += "No tiene tío.\n"
+                QMessageBox.information(self, "Información del Nodo", mensaje)
+            else:
+                QMessageBox.warning(self, "Error", "El nodo seleccionado no se encontró en el árbol.")
+        else:
+            QMessageBox.warning(self, "Error", "Por favor seleccione un nodo del árbol.")
+    def regresar_principal(self):  # Función para regresar a la ventana principal
+        self.close()  # Cerrar la ventana de agregar
+        self.ventana_principal.show()  # Mostrar la ventana principal
 class tam_peso():
     pass
 class Principal(QMainWindow):
@@ -285,6 +352,7 @@ class Principal(QMainWindow):
         self.pushButton.clicked.connect(self.abrir_agregar)
         self.pushButton_2.clicked.connect(self.abrir_eliminar)
         self.pushButton_3.clicked.connect(self.mostrar_recorrido_niveles)
+        self.pushButton_4.clicked.connect(self.abrir_buscar)
     def abrir_agregar(self):
         self.ventana_agregar = ventana_agregar(self.avl_tree, self)  # Crear una instancia de ventana_agregar
         self.hide()
@@ -293,6 +361,10 @@ class Principal(QMainWindow):
         self.ventana_eliminar=ventana_eliminar(self.avl_tree,self)
         self.hide()
         self.ventana_eliminar.show()
+    def abrir_buscar(self):
+        self.ventana_buscar=ventana_buscar(self.avl_tree,self)
+        self.hide()
+        self.ventana_buscar.show()
     def mostrar_recorrido_niveles(self):
         nivel_recorrido = self.avl_tree.recorrido_nivel()
         mensaje = "Recorrido por Niveles:\n\n"

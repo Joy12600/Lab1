@@ -114,7 +114,6 @@ class AVLTree:
         if root.key < key:
             return self.buscar_nodo_padre(root.right, key)
         return self.buscar_nodo_padre(root.left, key)
-
     def buscar_abuelo(self, root, key):
         padre = self.buscar_nodo_padre(root, key)
         if padre:
@@ -129,6 +128,7 @@ class AVLTree:
                 return self.buscar_nodo_padre(root, padre.right.key)
             elif padre.right and padre.right.key == key:
                 return self.buscar_nodo_padre(root, padre.left.key)
+                
         return None
     def recorrido_nivel(self):
         resultado = []
@@ -305,13 +305,40 @@ class ventana_buscar(QMainWindow):
         loadUi("BuscarNodo.ui", self)
         self.avl_tree = avl_tree
         self.ventana_principal=Principal
-        self.pushButton_3.clicked.connect(self.regresar_principal)
         self.llenar_combobox()
+        self.pushButton_2.clicked.connect(self.buscar_nodo_mostrar_info)
+        self.pushButton_3.clicked.connect(self.regresar_principal)
     def llenar_combobox(self):
         nodos = self.avl_tree.recorrido_nivel()
         for nivel in nodos:
             for nodo in nivel:
                 self.comboBox.addItem(nodo[1], nodo[0])
+    def buscar_nodo_mostrar_info(self):
+        nodo_seleccionado = self.comboBox.currentData()
+        if nodo_seleccionado:
+            nodo = self.avl_tree.buscar_nodo(self.avl_tree.root, nodo_seleccionado)
+            if nodo:
+                mensaje = f"Nombre del Nodo: {nodo.full_name}\n"
+                padre = self.avl_tree.buscar_nodo_padre(self.avl_tree.root, nodo.key)
+                if padre:
+                    mensaje += f"Nombre del Padre: {padre.full_name}\n"
+                else:
+                    mensaje += "No tiene padre.\n"
+                abuelo = self.avl_tree.buscar_abuelo(self.avl_tree.root, nodo.key)
+                if abuelo:
+                    mensaje += f"Nombre del Abuelo: {abuelo.full_name}\n"
+                else:
+                    mensaje += "No tiene abuelo.\n" 
+                tio = self.avl_tree.buscar_tio(self.avl_tree.root, nodo.key)
+                if tio:
+                    mensaje += f"Nombre del Tío: {tio.full_name}\n"
+                else:
+                    mensaje += "No tiene tío.\n"
+                QMessageBox.information(self, "Información del Nodo", mensaje)
+            else:
+                QMessageBox.warning(self, "Error", "El nodo seleccionado no se encontró en el árbol.")
+        else:
+            QMessageBox.warning(self, "Error", "Por favor seleccione un nodo del árbol.")
     def regresar_principal(self):  # Función para regresar a la ventana principal
         self.close()  # Cerrar la ventana de agregar
         self.ventana_principal.show()  # Mostrar la ventana principal
