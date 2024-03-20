@@ -99,27 +99,27 @@ class AVLTree:
         while current.left is not None:
             current = current.left
         return current
+   
     def recorrido_nivel(self):
         resultado = []
         if self.root is None:
             return resultado
-
-        queue = [self.root]
-
-        while queue:
-            level_size = len(queue)
-            nivel_actual = []
-
-            for _ in range(level_size):
-                node = queue.pop(0)
-                nivel_actual.append(node.key)
-                if node.left:
-                    queue.append(node.left)
-                if node.right:
-                    queue.append(node.right)
-
-            resultado.append(nivel_actual)
+        self._recorrido_nivel_recursive([self.root], resultado)
         return resultado
+    def _recorrido_nivel_recursive(self, nodes, resultado):
+        if not nodes:
+            return
+        nivel_actual = []
+        siguiente_nivel = []
+        for node in nodes:
+            nivel_actual.append((node.key, node.full_name))
+            if node.left:
+                siguiente_nivel.append(node.left)
+            if node.right:
+                siguiente_nivel.append(node.right)
+
+        resultado.append(nivel_actual)
+        self._recorrido_nivel_recursive(siguiente_nivel, resultado)
     def get_height(self, root):
         if not root:
             return 0
@@ -258,12 +258,14 @@ class ventana_eliminar(QMainWindow):
         if node is None:
             return
         self.actualizar_combobox_recursivo(node.left)
-        self.comboBox.addItem(str(node.key))
+        self.comboBox.addItem(node.full_name, node.key)
         self.actualizar_combobox_recursivo(node.right)
      def eliminar_nodo(self):
-        nodo_a_eliminar = int(self.comboBox.currentText())
-        self.avl_tree.root = self.avl_tree.delete(self.avl_tree.root, nodo_a_eliminar)
-        self.avl_tree.plot_tree()
+        valor_seleccionado = self.comboBox.currentData()  # Obtener el valor (número) del nodo seleccionado
+        if valor_seleccionado:
+            nodo_a_eliminar = int(valor_seleccionado)
+            self.avl_tree.root = self.avl_tree.delete(self.avl_tree.root, nodo_a_eliminar)
+            self.avl_tree.plot_tree()
      def regresar_principal(self):  # Función para regresar a la ventana principal
         self.close()  # Cerrar la ventana de agregar
         self.ventana_principal.show()  # Mostrar la ventana principal
@@ -293,7 +295,10 @@ class Principal(QMainWindow):
         nivel_recorrido = self.avl_tree.recorrido_nivel()
         message = "Recorrido por Niveles:\n\n"
         for i, nivel in enumerate(nivel_recorrido):
-            message += f"Nivel {i}: {' '.join(map(str, nivel))}\n"  # Ajuste del índice del nivel
+            message += f"Nivel {i+1}: "
+            for nodo in nivel:
+                message += f"{nodo[1]} - "  # Agregar el nombre del nodo al mensaje
+            message += "\n"
         QMessageBox.information(self, "Recorrido por Niveles", message)
 if __name__ == "__main__": 
     app = QApplication(sys.argv)
