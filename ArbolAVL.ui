@@ -156,7 +156,7 @@ background-color: rgb(0, 255, 255);
        </property>
        <property name="icon">
         <iconset>
-         <normaloff>10335580.png</normaloff>10335580.png</iconset>
+         <normaloff>Suma.png</normaloff>Suma.png</iconset>
        </property>
        <property name="iconSize">
         <size>
@@ -182,7 +182,7 @@ background-color: rgb(0, 255, 255);
        </property>
        <property name="icon">
         <iconset>
-         <normaloff>png-clipart-plus-and-minus-signs-meno-subtraction-computer-icons-symbol-miscellaneous-rectangle-thumbnail-removebg-preview.png</normaloff>png-clipart-plus-and-minus-signs-meno-subtraction-computer-icons-symbol-miscellaneous-rectangle-thumbnail-removebg-preview.png</iconset>
+         <normaloff>Resta.png</normaloff>Resta.png</iconset>
        </property>
        <property name="iconSize">
         <size>
@@ -208,7 +208,7 @@ background-color: rgb(0, 255, 255);
        </property>
        <property name="icon">
         <iconset>
-         <normaloff>../../../Downloads/Recorrido-removebg-preview.png</normaloff>../../../Downloads/Recorrido-removebg-preview.png</iconset>
+         <normaloff>Recorrido.png</normaloff>Recorrido.png</iconset>
        </property>
        <property name="iconSize">
         <size>

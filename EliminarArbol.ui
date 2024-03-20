@@ -117,7 +117,7 @@ font: 14pt &quot;MS Shell Dlg 2&quot;;</string>
        </property>
        <property name="icon">
         <iconset>
-         <normaloff>descarga.png</normaloff>descarga.png</iconset>
+         <normaloff>Regresar.png</normaloff>Regresar.png</iconset>
        </property>
        <property name="iconSize">
         <size>

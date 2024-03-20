@@ -273,8 +273,6 @@ class ventana_buscar():
     pass
 class tam_peso():
     pass
-class recorrido_niveles():
-    pass
 class Principal(QMainWindow):
     def __init__(self):
         super(Principal, self).__init__()
@@ -293,13 +291,13 @@ class Principal(QMainWindow):
         self.ventana_eliminar.show()
     def mostrar_recorrido_niveles(self):
         nivel_recorrido = self.avl_tree.recorrido_nivel()
-        message = "Recorrido por Niveles:\n\n"
+        mensaje = "Recorrido por Niveles:\n\n"
         for i, nivel in enumerate(nivel_recorrido):
-            message += f"Nivel {i+1}: "
+            mensaje += f"Nivel {i}: "  # Cambio aquí: comenzar desde 0
             for nodo in nivel:
-                message += f"{nodo[1]} - "  # Agregar el nombre del nodo al mensaje
-            message += "\n"
-        QMessageBox.information(self, "Recorrido por Niveles", message)
+                mensaje += f"{nodo[1]} - "  # Agregar el nombre del nodo al mensaje
+            mensaje += "\n"
+        QMessageBox.information(self, "Recorrido por Niveles", mensaje)
 if __name__ == "__main__": 
     app = QApplication(sys.argv)
     my_app = Principal()
