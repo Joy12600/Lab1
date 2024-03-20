@@ -123,12 +123,30 @@ class AVLTree:
 
     def buscar_tio(self, root, key):
         padre = self.buscar_nodo_padre(root, key)
-        if padre:
-            if padre.left and padre.left.key == key:
-                return self.buscar_nodo_padre(root, padre.right.key)
-            elif padre.right and padre.right.key == key:
-                return self.buscar_nodo_padre(root, padre.left.key)
-                
+        if padre is None:
+            return None
+
+        izquierdo_hijo = padre.left
+        derecho_hijo = padre.right
+
+        if padre.right and padre.right.key == key:
+            if derecho_hijo is not None and derecho_hijo.left is not None:
+                tio = self.buscar_nodo_padre(root, derecho_hijo.left.key)
+                return tio
+
+            if derecho_hijo is not None and derecho_hijo.right is not None:
+                tio = self.buscar_nodo_padre(root, derecho_hijo.right.key)
+                return tio
+
+        if padre.left and padre.left.key == key:
+            if izquierdo_hijo is not None and izquierdo_hijo.right is not None:
+                tio = self.buscar_nodo_padre(root, izquierdo_hijo.right.key)
+                return tio
+
+            if izquierdo_hijo is not None and izquierdo_hijo.left is not None:
+                tio = self.buscar_nodo_padre(root, izquierdo_hijo.left.key)
+                return tio
+
         return None
     def recorrido_nivel(self):
         resultado = []
