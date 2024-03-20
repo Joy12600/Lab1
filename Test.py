@@ -278,6 +278,7 @@ class Principal(QMainWindow):
         self.avl_tree = AVLTree()
         self.pushButton.clicked.connect(self.abrir_agregar)
         self.pushButton_2.clicked.connect(self.abrir_eliminar)
+        self.pushButton_3.clicked.connect(self.mostrar_recorrido_niveles)
     def abrir_agregar(self):
         self.ventana_agregar = ventana_agregar(self.avl_tree, self)  # Crear una instancia de ventana_agregar
         self.hide()
@@ -287,11 +288,10 @@ class Principal(QMainWindow):
         self.hide()
         self.ventana_eliminar.show()
     def mostrar_recorrido_niveles(self):
-        nivel_recorrido = self.avl_tree.level_order_traversal()
+        nivel_recorrido = self.avl_tree.recorrido_nivel()
         message = "Recorrido por Niveles:\n\n"
         for i, nivel in enumerate(nivel_recorrido):
-            message += f"Nivel {i + 1}: {' '.join(map(str, nivel))}\n"
-
+            message += f"Nivel {i}: {' '.join(map(str, nivel))}\n"  # Ajuste del índice del nivel
         QMessageBox.information(self, "Recorrido por Niveles", message)
 if __name__ == "__main__": 
     app = QApplication(sys.argv)
