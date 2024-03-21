@@ -14,7 +14,16 @@ class TreeNode:
         self.right = None
         self.height = 1
         self.factor_balanceo = 0
-
+    def get_byte_size(self):
+        # Calcular el tamaño en bytes del nodo
+        size_key = sys.getsizeof(self.key)
+        size_full_name = sys.getsizeof(self.full_name)
+        # Agregar otros atributos si los hay
+        # Ejemplo:
+        # size_other_attr = sys.getsizeof(self.other_attr)
+        # Sumar todos los tamaños
+        total_size = size_key + size_full_name  # + size_other_attr
+        return total_size
 class AVLTree:
     def __init__(self):
         self.root = None
@@ -32,7 +41,6 @@ class AVLTree:
         right_height = self.get_height(root.right)
         root.balanceo = left_height - right_height
         balance = root.balanceo
-        root.factor_balanceo = right_height - left_height
 
         if balance > 1 and key < root.left.key:
             return self.right_rotate(root)
@@ -46,7 +54,8 @@ class AVLTree:
 
         if balance < -1 and key < root.right.key:
             root.right = self.right_rotate(root.right)
-            return self.left_rotate(root)    
+            return self.left_rotate(root)  
+        root.bytes_size = root.get_byte_size()  
         return root
     
     def delete(self, root, key):
@@ -91,7 +100,7 @@ class AVLTree:
             root.right = self.right_rotate(root.right)
             return self.left_rotate(root)
         root.balanceo = self.get_height(root.right) - self.get_height(root.left)
-        root.factor_balanceo = root.balanceo
+        root.bytes_size = root.get_byte_size()
         return root
     
     def get_min_value_node(self, root):
@@ -187,6 +196,8 @@ class AVLTree:
 
         z.height = 1 + max(self.get_height(z.left), self.get_height(z.right))
         y.height = 1 + max(self.get_height(y.left), self.get_height(y.right))
+        z.factor_balanceo = self.get_height(z.left) - self.get_height(z.right)
+        y.factor_balanceo = self.get_height(y.left) - self.get_height(y.right)
 
         return y
 
@@ -199,6 +210,8 @@ class AVLTree:
 
         z.height = 1 + max(self.get_height(z.left), self.get_height(z.right))
         y.height = 1 + max(self.get_height(y.left), self.get_height(y.right))
+        z.factor_balanceo = self.get_height(z.left) - self.get_height(z.right)
+        y.factor_balanceo = self.get_height(y.left) - self.get_height(y.right)
 
         return y
 
@@ -360,8 +373,68 @@ class ventana_buscar(QMainWindow):
     def regresar_principal(self):  # Función para regresar a la ventana principal
         self.close()  # Cerrar la ventana de agregar
         self.ventana_principal.show()  # Mostrar la ventana principal
-class tam_peso():
-    pass
+class tam_peso(QMainWindow):
+    def __init__(self, avl_tree, Principal):
+        super().__init__()
+        loadUi("Byte_Tam.ui", self)
+        self.avl_tree = avl_tree
+        self.ventana_principal=Principal
+        self.pushButton_3.clicked.connect(self.regresar_principal)
+        self.pushButton_2.clicked.connect(self.buscar_nodos)
+    def buscar_nodos(self):
+        categoria_seleccionada = self.comboBox.currentText()
+        try:
+            peso_min = float(self.lineEdit.text())
+            peso_max = float(self.lineEdit_2.text())
+            nodos_encontrados = []
+            self._buscar_nodos_recursive(self.avl_tree.root, categoria_seleccionada, peso_min, peso_max, nodos_encontrados)
+            mensaje = "Nodos encontrados:\n\n"
+            for nodo in nodos_encontrados:
+                mensaje += f"Nombre: {nodo.full_name}, Peso: {nodo.key}\n"
+            if not nodos_encontrados:
+                mensaje = "No se encontraron nodos que cumplan con los criterios de búsqueda."
+            QMessageBox.information(self, "Resultados de Búsqueda", mensaje)
+        except ValueError:
+            QMessageBox.warning(self, "Error", "Por favor ingrese valores numéricos válidos para el rango de peso.")
+
+    def _buscar_nodos_recursive(self, node, categoria, peso_min, peso_max, nodos_encontrados):
+        if node is None:
+            return
+
+        # Extraer la categoría del nombre del nodo
+        nombre = node.full_name.lower()
+        if nombre.startswith("b"):
+            categoria_nodo = "bike"
+        elif nombre.startswith("car"):
+            categoria_nodo = "car"
+        elif nombre.startswith("cat"):
+            categoria_nodo = "cat"
+        elif nombre.startswith("dog"):
+            categoria_nodo = "dog"
+        elif nombre.startswith("00"):
+            categoria_nodo = "Flower"
+        elif nombre.startswith("h"):
+            categoria_nodo = "horse"
+        elif nombre.startswith("r"):
+            categoria_nodo = "human"
+        else:
+            categoria_nodo = None  # Si no se puede determinar la categoría, asignar None
+
+        if categoria_nodo is not None:  # Verificar que se haya determinado la categoría
+            # Guardar la categoría en el nodo
+            node.category = categoria_nodo
+            # Calcular el peso del nodo utilizando sys.getsizeof()
+            peso_nodo = node.get_byte_size()
+            # Verificar si el nodo está en la categoría seleccionada y en el rango de peso
+            if categoria_nodo == categoria and peso_min <= peso_nodo <= peso_max:
+                nodos_encontrados.append(TreeNode(node.key, node.full_name))  # Crear una copia del nodo y agregarlo a la lista
+
+        # Llamar recursivamente a la función para los hijos del nodo
+        self._buscar_nodos_recursive(node.left, categoria, peso_min, peso_max, nodos_encontrados)
+        self._buscar_nodos_recursive(node.right, categoria, peso_min, peso_max, nodos_encontrados)
+    def regresar_principal(self):  # Función para regresar a la ventana principal
+        self.close()  # Cerrar la ventana de agregar
+        self.ventana_principal.show()  # Mostrar la ventana principal
 class Principal(QMainWindow):
     def __init__(self):
         super(Principal, self).__init__()
@@ -371,6 +444,7 @@ class Principal(QMainWindow):
         self.pushButton_2.clicked.connect(self.abrir_eliminar)
         self.pushButton_3.clicked.connect(self.mostrar_recorrido_niveles)
         self.pushButton_4.clicked.connect(self.abrir_buscar)
+        self.pushButton_5.clicked.connect(self.abrir_Byte_tam)
     def abrir_agregar(self):
         self.ventana_agregar = ventana_agregar(self.avl_tree, self)  # Crear una instancia de ventana_agregar
         self.hide()
@@ -383,6 +457,14 @@ class Principal(QMainWindow):
         self.ventana_buscar=ventana_buscar(self.avl_tree,self)
         self.hide()
         self.ventana_buscar.show()
+    def abrir_buscar(self):
+        self.ventana_buscar=ventana_buscar(self.avl_tree,self)
+        self.hide()
+        self.ventana_buscar.show()
+    def abrir_Byte_tam(self):
+        self.tam_peso=tam_peso(self.avl_tree,self)
+        self.hide()
+        self.tam_peso.show()
     def mostrar_recorrido_niveles(self):
         nivel_recorrido = self.avl_tree.recorrido_nivel()
         mensaje = "Recorrido por Niveles:\n\n"
