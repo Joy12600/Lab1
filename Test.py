@@ -54,11 +54,17 @@ class AVLTree:
         if not root:
             return root
 
+        # Si el nodo a eliminar es menor que la raíz, buscar en el subárbol izquierdo
         if key < root.key:
             root.left = self.delete(root.left, key)
+
+        # Si el nodo a eliminar es mayor que la raíz, buscar en el subárbol derecho
         elif key > root.key:
             root.right = self.delete(root.right, key)
+
+        # Si el nodo a eliminar es igual a la raíz, proceder con la eliminación
         else:
+            # Caso 1: nodo a eliminar es una hoja o tiene un solo hijo
             if root.left is None:
                 temp = root.right
                 root = None
@@ -68,16 +74,25 @@ class AVLTree:
                 root = None
                 return temp
 
+            # Caso 2: nodo a eliminar tiene dos hijos
+            # Encontrar el sucesor inmediato (el nodo más pequeño en el subárbol derecho)
             temp = self.get_min_value_node(root.right)
+
+            # Copiar los datos del sucesor inmediato al nodo actual
             root.key = temp.key
+
+            # Eliminar el sucesor inmediato
             root.right = self.delete(root.right, temp.key)
 
+        # Actualizar la altura del nodo actual
         if root is None:
             return root
-
         root.height = 1 + max(self.get_height(root.left), self.get_height(root.right))
+
+        # Calcular el factor de equilibrio del nodo actual
         balance = self.get_balance(root)
 
+        # Realizar rotaciones si es necesario para balancear el árbol
         if balance > 1 and self.get_balance(root.left) >= 0:
             return self.right_rotate(root)
 
@@ -91,8 +106,11 @@ class AVLTree:
         if balance < -1 and self.get_balance(root.right) > 0:
             root.right = self.right_rotate(root.right)
             return self.left_rotate(root)
+
+        # Actualizar el factor de equilibrio del nodo actual
         root.balanceo = self.get_height(root.right) - self.get_height(root.left)
-        root.factor_balanceo=self.get_height(root.right) - self.get_height(root.left)
+        root.factor_balanceo = self.get_height(root.right) - self.get_height(root.left)
+
         return root
     
     def get_min_value_node(self, root):
