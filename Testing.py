@@ -92,6 +92,7 @@ class AVLTree:
             root.right = self.right_rotate(root.right)
             return self.left_rotate(root)
         root.balanceo = self.get_height(root.right) - self.get_height(root.left)
+        root.factor_balanceo=self.get_height(root.right) - self.get_height(root.left)
         return root
     
     def get_min_value_node(self, root):
@@ -392,7 +393,10 @@ class tam_peso(QMainWindow):
         if node is None:
             return
 
-        # Extraer la categoría del nombre del nodo
+        # Initialize categoria_nodo to None
+        categoria_nodo = None
+
+        # Extract the category from the node's name
         nombre = node.full_name.lower()
         if nombre.startswith("b"):
             categoria_nodo = "bike"

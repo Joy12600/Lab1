@@ -393,7 +393,10 @@ class tam_peso(QMainWindow):
         if node is None:
             return
 
-        # Extraer la categoría del nombre del nodo
+        # Initialize categoria_nodo to None
+        categoria_nodo = None
+
+        # Extract the category from the node's name
         nombre = node.full_name.lower()
         if nombre.startswith("b"):
             categoria_nodo = "bike"

@@ -260,7 +260,7 @@ background-color: rgb(0, 255, 255);
        </property>
        <property name="icon">
         <iconset>
-         <normaloff>Buscar-removebg-preview.png</normaloff>Buscar-removebg-preview.png</iconset>
+         <normaloff>archivo.png</normaloff>archivo.png</iconset>
        </property>
        <property name="iconSize">
         <size>
