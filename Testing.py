@@ -13,17 +13,8 @@ class TreeNode:
         self.left = None
         self.right = None
         self.height = 1
-        self.factor_balanceo = 0
-    def get_byte_size(self):
-        # Calcular el tamaño en bytes del nodo
-        size_key = sys.getsizeof(self.key)
-        size_full_name = sys.getsizeof(self.full_name)
-        # Agregar otros atributos si los hay
-        # Ejemplo:
-        # size_other_attr = sys.getsizeof(self.other_attr)
-        # Sumar todos los tamaños
-        total_size = size_key + size_full_name  # + size_other_attr
-        return total_size
+        self.balanceo= 0
+        self.bytes_size = sys.getsizeof(key) + sys.getsizeof(full_name)
 class AVLTree:
     def __init__(self):
         self.root = None
@@ -39,25 +30,30 @@ class AVLTree:
         root.height = 1 + max(self.get_height(root.left), self.get_height(root.right))
         left_height = self.get_height(root.left)
         right_height = self.get_height(root.right)
-        root.balanceo = left_height - right_height
-        balance = root.balanceo
+        root.balanceo = self.get_balance(root)
+        return self.rebalance(root, key)
+    def rebalance(self, root, key):
+        balance = self.get_balance(root)  
 
-        if balance > 1 and key < root.left.key:
-            return self.right_rotate(root)
+        # Caso de desequilibrio a la izquierda
+        if balance > 1:
+            if key < root.left.key:
+                return self.right_rotate(root)
+            else:
+                return self.right_rotate(root)
 
-        if balance < -1 and key > root.right.key:
-            return self.left_rotate(root)
+        # Caso de desequilibrio a la derecha
+        if balance < -1:
+            if key > root.right.key:
+                return self.left_rotate(root)
+            else:
+                return self.right_left_rotate(root)
 
-        if balance > 1 and key > root.left.key:
-            root.left = self.left_rotate(root.left)
-            return self.right_rotate(root)
-
-        if balance < -1 and key < root.right.key:
-            root.right = self.right_rotate(root.right)
-            return self.left_rotate(root)  
-        root.bytes_size = root.get_byte_size()  
         return root
-    
+    def get_balance(self, root):
+        if not root:
+            return 0
+        return self.get_height(root.left) - self.get_height(root.right)
     def delete(self, root, key):
         if not root:
             return root
@@ -84,24 +80,10 @@ class AVLTree:
             return root
 
         root.height = 1 + max(self.get_height(root.left), self.get_height(root.right))
-        balance = self.get_balance(root)
+        root.balanceo = self.get_balance(root)
 
-        if balance > 1 and self.get_balance(root.left) >= 0:
-            return self.right_rotate(root)
-
-        if balance < -1 and self.get_balance(root.right) <= 0:
-            return self.left_rotate(root)
-
-        if balance > 1 and self.get_balance(root.left) < 0:
-            root.left = self.left_rotate(root.left)
-            return self.right_rotate(root)
-
-        if balance < -1 and self.get_balance(root.right) > 0:
-            root.right = self.right_rotate(root.right)
-            return self.left_rotate(root)
-        root.balanceo = self.get_height(root.right) - self.get_height(root.left)
-        root.bytes_size = root.get_byte_size()
-        return root
+        # Rebalancear si es necesario
+        return self.rebalance(root, key)
     
     def get_min_value_node(self, root):
         current = root
@@ -227,7 +209,7 @@ class AVLTree:
             return
 
         ax.plot(x, y, 'ko', markersize=10, alpha=0.3)  # Ajuste de la transparencia
-        ax.text(x, y, f'{node.key}\n{node.full_name}\n{node.factor_balanceo}', fontsize=12, ha='center', va='center')
+        ax.text(x, y, f'{node.key}\n{node.full_name}\n{node.balanceo}', fontsize=12, ha='center', va='center')
 
         if node.left:
             ax.plot([x, x - dx], [y, y - 50], 'k-', alpha=0.3)  # Ajuste de la transparencia
@@ -417,17 +399,16 @@ class tam_peso(QMainWindow):
             categoria_nodo = "horse"
         elif nombre.startswith("r"):
             categoria_nodo = "human"
-        else:
-            categoria_nodo = None  # Si no se puede determinar la categoría, asignar None
 
-        if categoria_nodo is not None:  # Verificar que se haya determinado la categoría
-            # Guardar la categoría en el nodo
-            node.category = categoria_nodo
-            # Calcular el peso del nodo utilizando sys.getsizeof()
-            peso_nodo = node.get_byte_size()
-            # Verificar si el nodo está en la categoría seleccionada y en el rango de peso
-            if categoria_nodo == categoria and peso_min <= peso_nodo <= peso_max:
-                nodos_encontrados.append(TreeNode(node.key, node.full_name))  # Crear una copia del nodo y agregarlo a la lista
+        # Guardar la categoría en el nodo
+        node.category = categoria_nodo
+
+        # Calcular el peso del nodo utilizando sys.getsizeof()
+        peso_nodo = sys.getsizeof(node.key) + sys.getsizeof(node.full_name)
+
+        # Verificar si el nodo está en la categoría seleccionada y en el rango de peso
+        if categoria_nodo == categoria and peso_min <= peso_nodo <= peso_max:
+            nodos_encontrados.append(TreeNode(node.key, node.full_name))  # Crear una copia del nodo y agregarlo a la lista
 
         # Llamar recursivamente a la función para los hijos del nodo
         self._buscar_nodos_recursive(node.left, categoria, peso_min, peso_max, nodos_encontrados)

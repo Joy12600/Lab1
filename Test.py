@@ -13,7 +13,7 @@ class TreeNode:
         self.left = None
         self.right = None
         self.height = 1
-        self.factor_balanceo = 0
+        self.balanceo= 0
         self.bytes_size = sys.getsizeof(key) + sys.getsizeof(full_name)
 class AVLTree:
     def __init__(self):
@@ -30,7 +30,7 @@ class AVLTree:
         root.height = 1 + max(self.get_height(root.left), self.get_height(root.right))
         left_height = self.get_height(root.left)
         right_height = self.get_height(root.right)
-        root.balanceo = left_height - right_height
+        root.balanceo = right_height - left_height
         balance = root.balanceo
 
         if balance > 1 and key < root.left.key:
@@ -216,7 +216,7 @@ class AVLTree:
             return
 
         ax.plot(x, y, 'ko', markersize=10, alpha=0.3)  # Ajuste de la transparencia
-        ax.text(x, y, f'{node.key}\n{node.full_name}\n{node.factor_balanceo}', fontsize=12, ha='center', va='center')
+        ax.text(x, y, f'{node.key}\n{node.full_name}\n{node.balanceo}', fontsize=12, ha='center', va='center')
 
         if node.left:
             ax.plot([x, x - dx], [y, y - 50], 'k-', alpha=0.3)  # Ajuste de la transparencia
