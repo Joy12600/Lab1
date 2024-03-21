@@ -54,11 +54,17 @@ class AVLTree:
         if not root:
             return root
 
+        # Si el nodo a eliminar es menor que la raíz, buscar en el subárbol izquierdo
         if key < root.key:
             root.left = self.delete(root.left, key)
+
+        # Si el nodo a eliminar es mayor que la raíz, buscar en el subárbol derecho
         elif key > root.key:
             root.right = self.delete(root.right, key)
+
+        # Si el nodo a eliminar es igual a la raíz, proceder con la eliminación
         else:
+            # Caso 1: nodo a eliminar es una hoja o tiene un solo hijo
             if root.left is None:
                 temp = root.right
                 root = None
@@ -68,16 +74,26 @@ class AVLTree:
                 root = None
                 return temp
 
+            # Caso 2: nodo a eliminar tiene dos hijos
+            # Encontrar el sucesor inmediato (el nodo más pequeño en el subárbol derecho)
             temp = self.get_min_value_node(root.right)
+
+            # Copiar los datos del sucesor inmediato al nodo actual
             root.key = temp.key
+            root.full_name = temp.full_name
+
+            # Eliminar el sucesor inmediato
             root.right = self.delete(root.right, temp.key)
 
+        # Actualizar la altura del nodo actual
         if root is None:
             return root
-
         root.height = 1 + max(self.get_height(root.left), self.get_height(root.right))
+
+        # Calcular el factor de equilibrio del nodo actual
         balance = self.get_balance(root)
 
+        # Realizar rotaciones si es necesario para balancear el árbol
         if balance > 1 and self.get_balance(root.left) >= 0:
             return self.right_rotate(root)
 
@@ -91,10 +107,12 @@ class AVLTree:
         if balance < -1 and self.get_balance(root.right) > 0:
             root.right = self.right_rotate(root.right)
             return self.left_rotate(root)
+
+        # Actualizar el factor de equilibrio del nodo actual
         root.balanceo = self.get_height(root.right) - self.get_height(root.left)
-        root.factor_balanceo=self.get_height(root.right) - self.get_height(root.left)
+        root.factor_balanceo = self.get_height(root.right) - self.get_height(root.left)
+
         return root
-    
     def get_min_value_node(self, root):
         current = root
         while current.left is not None:
@@ -317,8 +335,14 @@ class ventana_eliminar(QMainWindow):
         valor_seleccionado = self.comboBox.currentData()  # Obtener el valor (número) del nodo seleccionado
         if valor_seleccionado:
             nodo_a_eliminar = int(valor_seleccionado)
-            self.avl_tree.root = self.avl_tree.delete(self.avl_tree.root, nodo_a_eliminar)
-            self.avl_tree.plot_tree()
+            nodo = self.avl_tree.buscar_nodo(self.avl_tree.root, nodo_a_eliminar)
+            if nodo:
+                nombre_nodo = nodo.full_name
+                self.avl_tree.root = self.avl_tree.delete(self.avl_tree.root, nodo_a_eliminar)
+                self.valores_agregados.discard(nombre_nodo)  # Eliminar el nombre del nodo de la lista de valores agregados
+                self.avl_tree.plot_tree()
+            else:
+                QMessageBox.warning(self, "Error", "El nodo seleccionado no se encontró en el árbol.")
      def regresar_principal(self):  # Función para regresar a la ventana principal
         self.close()  # Cerrar la ventana de agregar
         self.ventana_principal.show()  # Mostrar la ventana principal
@@ -393,10 +417,10 @@ class tam_peso(QMainWindow):
         if node is None:
             return
 
-        # Initialize categoria_nodo to None
+        # Inicializar la categoría del nodo como None
         categoria_nodo = None
 
-        # Extract the category from the node's name
+        # Extraer la categoría del nombre del nodo
         nombre = node.full_name.lower()
         if nombre.startswith("b"):
             categoria_nodo = "bike"
@@ -407,7 +431,7 @@ class tam_peso(QMainWindow):
         elif nombre.startswith("dog"):
             categoria_nodo = "dog"
         elif nombre.startswith("00"):
-            categoria_nodo = "Flower"
+            categoria_nodo = "flowers"
         elif nombre.startswith("h"):
             categoria_nodo = "horse"
         elif nombre.startswith("r"):
@@ -416,11 +440,11 @@ class tam_peso(QMainWindow):
         # Guardar la categoría en el nodo
         node.category = categoria_nodo
 
-        # Calcular el peso del nodo utilizando sys.getsizeof()
-        peso_nodo = sys.getsizeof(node.key) + sys.getsizeof(node.full_name)
+        # Calcular el peso del nodo en kilobytes
+        peso_nodo_kb = (node.bytes_size) / 1024  # Convertir bytes a kilobytes
 
         # Verificar si el nodo está en la categoría seleccionada y en el rango de peso
-        if categoria_nodo == categoria and peso_min <= peso_nodo <= peso_max:
+        if categoria_nodo == categoria and peso_min <= peso_nodo_kb <= peso_max:
             nodos_encontrados.append(TreeNode(node.key, node.full_name))  # Crear una copia del nodo y agregarlo a la lista
 
         # Llamar recursivamente a la función para los hijos del nodo
